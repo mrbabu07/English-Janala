@@ -4,11 +4,56 @@ const loadlessons = () => {
     .then((json) => displayLesson(json.data));
 };
 
+const removeActive = () => {
+  const lessonButtons = document.querySelectorAll(".lesson-btn");
+  lessonButtons.forEach((btn) => btn.classList.remove("active"));
+};
+
+const loadLevelDetail = async (id) =>{
+  const url=`https://openapi.programming-hero.com/api/word/${id}`;
+ 
+  const res = await fetch(url);
+  const details=await res.json();
+  displayWordDetails(details.data)
+
+};
+const displayWordDetails=(word)=>{
+console.log(word)
+const detailsBox=document.getElementById("details-container")
+detailsBox.innerHTML=`<div class="">
+        <h2 class="text-2xl font-bold">${word.word} ( <i class="fa-solid fa-microphone-lines"></i>    :${word.pronunciation})</h2>
+      </div>
+      <div class="">
+        <h2 class="font-bold">Meaning</h2>
+        <p>${word.meaning}</p>
+      </div>
+      <div class="">
+        <h2 class="font-bold">Example</h2>
+        <p>${word.sentence}</p>
+      </div>
+      <div class="">
+        <h2 class="font-bold">synonym</h2>
+        <span class="btn">syn1</span>
+        <span class="btn">syn1</span>
+        <span class="btn">syn1</span>
+      </div>
+      
+      `;
+document.getElementById("word_modal").showModal();
+}
+
+
 const loadLevelWord = (id) => {
   const url = `https://openapi.programming-hero.com/api/level/${id}`;
   fetch(url)
     .then((res) => res.json())
-    .then((data) => displayLevelWord(data.data));
+    .then((data) => {
+      removeActive(); //remove all active class 
+      const clickBtn = document.getElementById(`lesson-btn-${id}`);
+        clickBtn.classList.add("active") //add active class
+      
+      displayLevelWord(data.data)
+    });
 };
 
 const displayLevelWord = (words) => {
@@ -35,8 +80,9 @@ const displayLevelWord = (words) => {
 
         <div class="font-bangla font-medium text-2xl">"${word.meaning ? word.meaning : "No Meaning Found"} / ${word.pronunciation ? word.pronunciation : "No Pronunciation Found" }"</div>
         <div class="flex justify-between items-center">
-          <button class="btn bg-[#1A91FF20] hover:bg-[#1A91FF80]"><i class="fa-solid fa-volume-high"></i></button>
-          <button class="btn bg-[#1A91FF20] hover:bg-[#1A91FF80]"><i class="fa-solid fa-circle-info"></i></button>
+          <button  class="btn bg-[#1A91FF20] hover:bg-[#1A91FF80]"><i class="fa-solid fa-volume-high"></i></button>
+          <button onclick="loadLevelDetail(${word.id})" class="btn bg-[#1A91FF20] hover:bg-[#1A91FF80]"><i class="fa-solid fa-circle-info"></i></button>
+        </div>
         </div>
 
   `;
@@ -54,7 +100,8 @@ const displayLesson = (lessons) => {
     // 3. create element
     const btnDiv = document.createElement("div");
     btnDiv.innerHTML = `
-      <button onclick="loadLevelWord(${lesson.level_no})"  class="btn btn-outline btn-primary">
+      <button  id="lesson-btn-${lesson.level_no}" onclick="loadLevelWord(${lesson.level_no})
+      "class="btn btn-outline btn-primary lesson-btn">
         <i class="fa-solid fa-book-open"></i>Lesson -${lesson.level_no}
       </button>
     `;
